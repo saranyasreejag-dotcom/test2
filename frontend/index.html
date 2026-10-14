@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexusLLM • Full-Stack AI Chatbox</title>
+  <meta name="description" content="A modern, high-performance LLM chatbox featuring a crystal-clear architectural separation between frontend presentation and backend orchestration.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-layout">
+    
+    <!-- Top Navigation Bar -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="brand-badge">
+          <div class="brand-logo-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a10 10 0 1 0 10 10H12V2z"></path>
+              <path d="M12 12 2.1 10.5"></path>
+              <path d="M12 12l4.5 8.9"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <h1 class="brand-title">Nexus<span class="gradient-text">LLM</span></h1>
+            <span class="brand-subtitle">Full-Stack AI Architecture</span>
+          </div>
+        </div>
+
+        <div class="header-divider"></div>
+
+        <!-- Architecture Badge Pill -->
+        <button id="btn-architecture-modal" class="pill-badge pill-interactive" title="View Frontend vs Backend Architecture Flow">
+          <span class="pill-icon">🏛️</span>
+          <span class="pill-label">Architecture: <strong>Frontend ↔ Backend</strong></span>
+        </button>
+      </div>
+
+      <div class="header-right">
+        <!-- Live Backend Status Indicator -->
+        <div id="backend-status-badge" class="status-badge connecting" title="Checking Node.js Backend Server">
+          <span class="status-dot"></span>
+          <span id="backend-status-text" class="status-text">Connecting to Backend...</span>
+          <span id="backend-latency-tag" class="latency-tag">--ms</span>
+        </div>
+
+        <!-- Live Supabase Status Indicator -->
+        <div id="supabase-status-badge" class="status-badge offline" title="Supabase Database Connection">
+          <span class="status-dot"></span>
+          <span id="supabase-status-text" class="status-text">Supabase: Offline</span>
+        </div>
+
+        <!-- Active Model Pill -->
+        <div id="active-model-display" class="model-pill">
+          <span class="provider-icon" id="header-provider-icon">🤖</span>
+          <span id="header-model-name" class="model-name">Demo Simulator</span>
+        </div>
+
+        <!-- Quick Action Buttons -->
+        <button id="btn-open-inspector" class="icon-button" title="Open Network & Payload Inspector" aria-label="Open Network & Payload Inspector">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+        </button>
+
+        <button id="btn-open-settings" class="icon-button" title="Configure API Keys & LLM Provider" aria-label="Settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+
+        <button id="btn-toggle-theme" class="icon-button" title="Toggle Theme" aria-label="Toggle Theme">
+          <span id="theme-icon">🌙</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="chat-viewport">
+      
+      <!-- Welcome Empty State -->
+      <section id="welcome-container" class="welcome-container">
+        <div class="welcome-card">
+          <div class="welcome-glow-orb"></div>
+          <div class="welcome-icon-stack">
+            <div class="stack-badge stack-front">💻 Frontend (Client)</div>
+            <div class="stack-arrow">⇄ REST API ⇄</div>
+            <div class="stack-badge stack-back">🛡️ Backend (Node.js)</div>
+            <div class="stack-arrow">⇄ Auth SDK ⇄</div>
+            <div class="stack-badge stack-cloud">🧠 LLM (Gemini / OpenAI)</div>
+          </div>
+
+          <h2 class="welcome-title">Full-Stack <span class="gradient-text">LLM Chatbox</span></h2>
+          <p class="welcome-desc">
+            Experience real-time AI conversations built with a <strong>clean, enterprise-grade separation of concerns</strong>. 
+            The browser never touches your private API keys—all prompts flow through your secure Node.js backend.
+          </p>
+
+          <div class="welcome-architecture-highlights">
+            <div class="arch-card">
+              <div class="arch-card-icon">🎨</div>
+              <div class="arch-card-content">
+                <strong>Frontend Layer</strong>
+                <p>Pure HTML5/CSS/JS. Handles UI rendering, user interaction, message history, and JSON serialization.</p>
+              </div>
+            </div>
+            <div class="arch-card">
+              <div class="arch-card-icon">🔒</div>
+              <div class="arch-card-content">
+                <strong>Backend Gateway</strong>
+                <p>Node.js & Express on port 3001. Enforces validation, guards private API keys, and formats LLM prompts.</p>
+              </div>
+            </div>
+            <div class="arch-card">
+              <div class="arch-card-icon">⚡</div>
+              <div class="arch-card-content">
+                <strong>Multi-Provider LLM</strong>
+                <p>Supports Google Gemini, OpenAI, and a built-in smart simulator that runs with zero configuration.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Starter Prompts -->
+          <div class="starter-section">
+            <span class="starter-label">Try one of these starter prompts:</span>
+            <div class="starter-chips">
+              <button class="prompt-chip" data-prompt="What is the architectural differentiation between Frontend and Backend in an LLM application?">
+                🏛️ Explain Frontend vs Backend separation
+              </button>
+              <button class="prompt-chip" data-prompt="Write a Node.js Express route for handling chat completions with error handling.">
+                💻 Show backend route code
+              </button>
+              <button class="prompt-chip" data-prompt="Why should API keys never be stored or used directly in frontend JavaScript code?">
+                🔐 Why keep API keys on the backend?
+              </button>
+              <button class="prompt-chip" data-prompt="Explain how large language models generate tokens step by step.">
+                🧠 How do LLMs generate responses?
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Chat Messages Scroll Container -->
+      <section id="chat-messages-container" class="messages-container hidden" aria-live="polite">
+        <!-- Messages dynamically rendered here -->
+      </section>
+
+      <!-- Typing Indicator -->
+      <div id="typing-indicator" class="typing-indicator hidden">
+        <div class="indicator-avatar">
+          <span class="ai-sparkle">✦</span>
+        </div>
+        <div class="indicator-bubble">
+          <div class="typing-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <span class="indicator-label" id="indicator-label">AI is generating response via Backend...</span>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Chat Input Controls Bar -->
+    <footer class="app-footer">
+      <div class="input-card">
+        
+        <!-- Input Top Toolbar -->
+        <div class="input-toolbar">
+          <div class="toolbar-left">
+            <label for="provider-select" class="toolbar-label">Engine:</label>
+            <select id="provider-select" class="toolbar-select">
+              <option value="mock">🤖 Demo Simulator (No Key Needed)</option>
+              <option value="gemini">✨ Google Gemini 1.5</option>
+              <option value="openai">⚡ OpenAI GPT-4o</option>
+            </select>
+
+            <select id="model-select" class="toolbar-select">
+              <!-- Dynamically populated from backend /api/models -->
+              <option value="mock-llm-v1">Mock Simulator v1</option>
+            </select>
+          </div>
+
+          <div class="toolbar-right">
+            <button id="btn-clear-chat" class="toolbar-btn" title="Clear Chat History">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+              <span>Clear</span>
+            </button>
+            <button id="btn-export-chat" class="toolbar-btn" title="Export Chat History as Markdown">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Export</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Textarea & Send Button -->
+        <div class="input-main-row">
+          <textarea 
+            id="user-prompt-input" 
+            rows="1" 
+            placeholder="Type your message here... (Press Enter to send, Shift+Enter for new line)"
+            aria-label="Chat prompt input"
+          ></textarea>
+
+          <button id="btn-send-message" class="send-button" title="Send message (Enter)" aria-label="Send message">
+            <svg id="send-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Architectural Differentiation Micro-Banner -->
+        <div class="input-footer-info">
+          <div class="info-flow">
+            <span class="step step-front">Frontend: Captures prompt</span>
+            <span class="arrow">➜</span>
+            <span class="step step-net">POST /api/chat</span>
+            <span class="arrow">➜</span>
+            <span class="step step-back">Backend: Injects Key &amp; Calls LLM</span>
+            <span class="arrow">➜</span>
+            <span class="step step-render">Frontend: Renders Markdown</span>
+          </div>
+        </div>
+
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 1: ARCHITECTURE DIFFERENTIATION MODAL                     -->
+  <!-- ============================================================== -->
+  <div id="modal-architecture" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="arch-modal-title">
+    <div class="modal-container modal-wide">
+      <div class="modal-header">
+        <div class="modal-header-title">
+          <span class="modal-icon">🏛️</span>
+          <div>
+            <h3 id="arch-modal-title">System Architecture: Frontend vs Backend</h3>
+            <span class="modal-subtitle">Why and how this LLM chatbox separates concerns</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" data-close="modal-architecture" aria-label="Close modal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        
+        <!-- Interactive Visual Pipeline -->
+        <div class="pipeline-visual-wrapper">
+          <h4 class="section-heading">Data Flow Pipeline</h4>
+          <div class="pipeline-diagram">
+            
+            <div class="pipeline-node node-client">
+              <div class="node-badge">LAYER 1</div>
+              <div class="node-icon">💻</div>
+              <div class="node-name">Frontend (Client)</div>
+              <div class="node-tech">HTML5 • Vanilla CSS • JavaScript</div>
+              <ul class="node-bullets">
+                <li>Runs inside the user's browser</li>
+                <li>Renders UI &amp; processes Markdown</li>
+                <li>Collects user input</li>
+                <li><strong>Never stores secret API keys</strong></li>
+              </ul>
+            </div>
+
+            <div class="pipeline-connector">
+              <div class="connector-line"></div>
+              <div class="connector-badge">HTTP REST<br><code>POST /api/chat</code></div>
+              <div class="connector-arrow">▶</div>
+            </div>
+
+            <div class="pipeline-node node-server">
+              <div class="node-badge">LAYER 2</div>
+              <div class="node-icon">🛡️</div>
+              <div class="node-name">Backend (Server)</div>
+              <div class="node-tech">Node.js • Express • Port 3001</div>
+              <ul class="node-bullets">
+                <li>Validates and sanitizes prompts</li>
+                <li>Reads <code>.env</code> credentials securely</li>
+                <li>Orchestrates Gemini / OpenAI APIs</li>
+                <li>Returns clean JSON payload</li>
+              </ul>
+            </div>
+
+            <div class="pipeline-connector">
+              <div class="connector-line"></div>
+              <div class="connector-badge">Authorized HTTPS<br><code>Bearer / API Key</code></div>
+              <div class="connector-arrow">▶</div>
+            </div>
+
+            <div class="pipeline-node node-cloud">
+              <div class="node-badge">LAYER 3</div>
+              <div class="node-icon">🧠</div>
+              <div class="node-name">LLM Cloud Provider</div>
+              <div class="node-tech">Google Gemini • OpenAI API</div>
+              <ul class="node-bullets">
+                <li>Processes context &amp; generation tokens</li>
+                <li>Applies temperature &amp; reasoning</li>
+                <li>Streams or completes response</li>
+                <li>Charges against your API account</li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="comparison-section">
+          <h4 class="section-heading">Architectural Comparison</h4>
+          <div class="table-container">
+            <table class="arch-table">
+              <thead>
+                <tr>
+                  <th>Dimension</th>
+                  <th>Frontend Layer (Client)</th>
+                  <th>Backend Layer (Server)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Execution Environment</strong></td>
+                  <td>User's web browser (V8 / SpiderMonkey / WebKit)</td>
+                  <td>Node.js runtime server (Localhost or Cloud VM)</td>
+                </tr>
+                <tr>
+                  <td><strong>API Key Security</strong></td>
+                  <td><span class="danger-tag">❌ Vulnerable</span> (Keys in client code can be viewed in DevTools by anyone)</td>
+                  <td><span class="safe-tag">✅ Secure</span> (Keys stored in environment variables, never sent to client)</td>
+                </tr>
+                <tr>
+                  <td><strong>Primary Role</strong></td>
+                  <td>User Experience, event listeners, accessibility, responsive styling, markdown formatting</td>
+                  <td>API routing, authentication, business logic, payload conversion, rate limiting, error recovery</td>
+                </tr>
+                <tr>
+                  <td><strong>Data Handled</strong></td>
+                  <td>UI state, active thread messages, draft inputs</td>
+                  <td>LLM provider payloads, secrets, server logging, token metrics</td>
+                </tr>
+                <tr>
+                  <td><strong>Supabase Integration</strong></td>
+                  <td><span class="safe-tag">Public Anon Key</span> (<code>SUPABASE_ANON_KEY</code>) protected by Row-Level Security (RLS)</td>
+                  <td><span class="safe-tag">Service Role Secret</span> (<code>SUPABASE_SERVICE_ROLE_KEY</code>) with direct database administration</td>
+                </tr>
+                <tr>
+                  <td><strong>Environment (.env)</strong></td>
+                  <td><code>frontend/.env</code>: <code>SUPABASE_URL</code>, <code>SUPABASE_ANON_KEY</code>, <code>API_BASE_URL</code></td>
+                  <td><code>backend/.env</code>: <code>PORT</code>, <code>GEMINI_API_KEY</code>, <code>OPENAI_API_KEY</code>, <code>SUPABASE_SERVICE_ROLE_KEY</code></td>
+                </tr>
+                <tr>
+                  <td><strong>Files in Project</strong></td>
+                  <td><code>frontend/index.html</code>, <code>style.css</code>, <code>app.js</code>, <code>.env</code></td>
+                  <td><code>backend/server.js</code>, <code>controllers/</code>, <code>services/</code>, <code>routes/</code>, <code>.env</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-close="modal-architecture">Got it!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 2: NETWORK & PAYLOAD INSPECTOR MODAL                      -->
+  <!-- ============================================================== -->
+  <div id="modal-inspector" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="inspector-modal-title">
+    <div class="modal-container modal-wide">
+      <div class="modal-header">
+        <div class="modal-header-title">
+          <span class="modal-icon">🔍</span>
+          <div>
+            <h3 id="inspector-modal-title">Live Network &amp; Payload Inspector</h3>
+            <span class="modal-subtitle">Examine the exact JSON payloads exchanged across layers</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" data-close="modal-inspector" aria-label="Close modal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        
+        <div class="inspector-grid">
+          <!-- Request from Frontend to Backend -->
+          <div class="inspector-card">
+            <div class="inspector-card-header">
+              <span class="card-badge req-badge">Frontend ➜ Backend (POST /api/chat)</span>
+              <span class="card-meta" id="inspector-req-time">--:--:--</span>
+            </div>
+            <pre class="code-preview"><code id="inspector-request-json">// No request sent yet. Send a message to inspect the payload!</code></pre>
+          </div>
+
+          <!-- Response from Backend to Frontend -->
+          <div class="inspector-card">
+            <div class="inspector-card-header">
+              <span class="card-badge res-badge">Backend ➜ Frontend (JSON Response)</span>
+              <span class="card-meta" id="inspector-res-time">--ms</span>
+            </div>
+            <pre class="code-preview"><code id="inspector-response-json">// No response captured yet.</code></pre>
+          </div>
+        </div>
+
+        <div class="inspector-metrics" id="inspector-metrics">
+          <div class="metric-pill">
+            <span class="metric-label">Provider:</span>
+            <span class="metric-val" id="metric-provider">--</span>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-label">Model:</span>
+            <span class="metric-val" id="metric-model">--</span>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-label">LLM Latency:</span>
+            <span class="metric-val" id="metric-llm-latency">--</span>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-label">Total Roundtrip:</span>
+            <span class="metric-val" id="metric-total-time">--</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-copy-inspector">Copy Inspector Log</button>
+        <button class="btn btn-primary" data-close="modal-inspector">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 3: SETTINGS DRAWER / MODAL                                -->
+  <!-- ============================================================== -->
+  <div id="modal-settings" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div class="modal-header-title">
+          <span class="modal-icon">⚙️</span>
+          <div>
+            <h3 id="settings-modal-title">LLM Configuration &amp; Keys</h3>
+            <span class="modal-subtitle">Configure backend credentials and model preferences</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" data-close="modal-settings" aria-label="Close modal">✕</button>
+      </div>
+
+      <div class="modal-body form-body">
+        
+        <div class="settings-notice">
+          <strong>🔒 Security Tip:</strong> 
+          You can paste your API key here for testing (sent only to your local backend over localhost), or save it directly into <code>backend/.env</code> on your machine!
+        </div>
+
+        <div class="form-group">
+          <label for="settings-provider" class="form-label">Active Provider</label>
+          <select id="settings-provider" class="form-select">
+            <option value="mock">Demo / Mock Simulator (No Key Required)</option>
+            <option value="gemini">Google Gemini (Free tier available)</option>
+            <option value="openai">OpenAI (GPT-4o, GPT-4o-mini)</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="group-gemini-key">
+          <div class="label-with-link">
+            <label for="settings-gemini-key" class="form-label">Google Gemini API Key</label>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="subtle-link">Get Free Gemini Key ↗</a>
+          </div>
+          <div class="input-with-action">
+            <input type="password" id="settings-gemini-key" class="form-input" placeholder="AIzaSy..." autocomplete="off">
+            <button type="button" class="btn-toggle-visibility" data-target="settings-gemini-key" title="Toggle Visibility">👁️</button>
+          </div>
+          <span class="form-hint">Used when Google Gemini is selected.</span>
+        </div>
+
+        <div class="form-group" id="group-openai-key">
+          <div class="label-with-link">
+            <label for="settings-openai-key" class="form-label">OpenAI API Key</label>
+            <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" class="subtle-link">Get OpenAI Key ↗</a>
+          </div>
+          <div class="input-with-action">
+            <input type="password" id="settings-openai-key" class="form-input" placeholder="sk-..." autocomplete="off">
+            <button type="button" class="btn-toggle-visibility" data-target="settings-openai-key" title="Toggle Visibility">👁️</button>
+          </div>
+          <span class="form-hint">Used when OpenAI is selected.</span>
+        </div>
+
+        <div class="form-group" id="group-supabase-url">
+          <div class="label-with-link">
+            <label for="settings-supabase-url" class="form-label">Supabase Project URL</label>
+            <a href="https://supabase.com/dashboard" target="_blank" rel="noopener" class="subtle-link">Supabase Dashboard ↗</a>
+          </div>
+          <input type="text" id="settings-supabase-url" class="form-input" placeholder="https://your-project-ref.supabase.co" autocomplete="off">
+          <span class="form-hint">Loaded from backend .env or frontend .env (Safe for client).</span>
+        </div>
+
+        <div class="form-group" id="group-supabase-key">
+          <div class="label-with-link">
+            <label for="settings-supabase-anon-key" class="form-label">Supabase Anon Key (Public)</label>
+          </div>
+          <div class="input-with-action">
+            <input type="password" id="settings-supabase-anon-key" class="form-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI..." autocomplete="off">
+            <button type="button" class="btn-toggle-visibility" data-target="settings-supabase-anon-key" title="Toggle Visibility">👁️</button>
+          </div>
+          <span class="form-hint">Public anon key used with Supabase Row-Level Security.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="settings-system-prompt" class="form-label">System Instruction</label>
+          <textarea id="settings-system-prompt" class="form-textarea" rows="3" placeholder="You are a helpful, knowledgeable AI assistant."></textarea>
+          <span class="form-hint">Injected into the LLM context by the backend.</span>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-reset-settings">Reset Defaults</button>
+        <button class="btn btn-primary" id="btn-save-settings">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Supabase JS Client SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+</body>
+</html>

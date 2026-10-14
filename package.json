@@ -1,0 +1,14 @@
+{
+  "name": "fullstack-llm-chatbox",
+  "version": "1.0.0",
+  "description": "Full-stack LLM Chatbox with clear Frontend / Backend differentiation",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "node --watch backend/server.js",
+    "migrate": "node backend/scripts/migrate.js",
+    "backend": "cd backend && npm start"
+  },
+  "keywords": ["llm", "chatbox", "frontend", "backend", "fullstack"],
+  "author": "",
+  "license": "MIT"
+}
