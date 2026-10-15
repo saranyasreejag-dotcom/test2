@@ -11,12 +11,19 @@
  */
 
 // Determine API Base URL
-const API_BASE_URL = window.location.protocol === 'file:' 
-  ? 'http://localhost:3001' 
-  : (window.location.port ? window.location.origin : 'http://localhost:3001');
+function getApiBaseUrl() {
+  const custom = localStorage.getItem('nexus_backend_url');
+  if (custom && custom.trim()) return custom.trim().replace(/\/+$/, '');
+  if (window.location.protocol === 'file:') return 'http://localhost:3001';
+  if (window.location.port) return window.location.origin;
+  return 'http://localhost:3001';
+}
+
+let API_BASE_URL = getApiBaseUrl();
 
 // App State
 const state = {
+  backendUrl: localStorage.getItem('nexus_backend_url') || '',
   messages: [],
   currentConversationId: null,
   provider: localStorage.getItem('nexus_provider') || 'mock',
@@ -74,6 +81,7 @@ const DOM = {
   btnExportChat: document.getElementById('btn-export-chat'),
 
   // Settings
+  settingsBackendUrl: document.getElementById('settings-backend-url'),
   settingsProvider: document.getElementById('settings-provider'),
   settingsGeminiKey: document.getElementById('settings-gemini-key'),
   settingsOpenaiKey: document.getElementById('settings-openai-key'),
@@ -690,6 +698,7 @@ function updateHeaderPill() {
 }
 
 function syncSettingsFields() {
+  if (DOM.settingsBackendUrl) DOM.settingsBackendUrl.value = state.backendUrl;
   DOM.settingsProvider.value = state.provider;
   DOM.settingsGeminiKey.value = state.apiKeys.gemini;
   DOM.settingsOpenaiKey.value = state.apiKeys.openai;
@@ -699,6 +708,17 @@ function syncSettingsFields() {
 }
 
 function saveSettings() {
+  if (DOM.settingsBackendUrl) {
+    const customBackend = DOM.settingsBackendUrl.value.trim().replace(/\/+$/, '');
+    state.backendUrl = customBackend;
+    if (customBackend) {
+      localStorage.setItem('nexus_backend_url', customBackend);
+    } else {
+      localStorage.removeItem('nexus_backend_url');
+    }
+    API_BASE_URL = getApiBaseUrl();
+  }
+
   state.provider = DOM.settingsProvider.value;
   state.apiKeys.gemini = DOM.settingsGeminiKey.value.trim();
   state.apiKeys.openai = DOM.settingsOpenaiKey.value.trim();
@@ -716,12 +736,16 @@ function saveSettings() {
   DOM.providerSelect.value = state.provider;
   updateModelDropdown();
   initSupabaseClient();
+  checkBackendHealth();
+  loadPublicConfig();
+  fetchModels();
   closeModal(DOM.modalSettings);
-  showToast('Settings & Supabase configuration saved!', 'success');
+  showToast('Settings saved!', 'success');
 }
 
 function resetSettings() {
   if (confirm('Reset settings to default configuration?')) {
+    state.backendUrl = '';
     state.provider = 'mock';
     state.model = 'mock-llm-v1';
     state.apiKeys.gemini = '';
@@ -730,6 +754,7 @@ function resetSettings() {
     state.supabase.anonKey = '';
     state.systemPrompt = 'You are a helpful, knowledgeable AI assistant.';
     
+    localStorage.removeItem('nexus_backend_url');
     localStorage.removeItem('nexus_provider');
     localStorage.removeItem('nexus_model');
     localStorage.removeItem('nexus_key_gemini');
@@ -737,6 +762,7 @@ function resetSettings() {
     localStorage.removeItem('nexus_supabase_url');
     localStorage.removeItem('nexus_supabase_anon_key');
     localStorage.removeItem('nexus_sysprompt');
+    API_BASE_URL = getApiBaseUrl();
 
     syncSettingsFields();
     initFormValues();

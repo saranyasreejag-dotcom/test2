@@ -469,6 +469,15 @@
           You can paste your API key here for testing (sent only to your local backend over localhost), or save it directly into <code>backend/.env</code> on your machine!
         </div>
 
+        <div class="form-group" id="group-backend-url">
+          <div class="label-with-link">
+            <label for="settings-backend-url" class="form-label">Backend API URL</label>
+            <span class="badge-role" style="font-size: 0.72rem; padding: 2px 8px; border-radius: 999px; background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3);">Cloud / Vercel Host</span>
+          </div>
+          <input type="text" id="settings-backend-url" class="form-input" placeholder="http://localhost:3001 or https://test2.onrender.com" autocomplete="off">
+          <span class="form-hint">Enter your deployed Render backend URL when running frontend on Vercel, or leave as localhost for local dev.</span>
+        </div>
+
         <div class="form-group">
           <label for="settings-provider" class="form-label">Active Provider</label>
           <select id="settings-provider" class="form-select">
